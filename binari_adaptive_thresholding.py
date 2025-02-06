@@ -24,7 +24,7 @@ cv2.imshow('block check', block_check)
 
 # ------ Mean Adaptive Thresholding -------
 
-mean_bin = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51, 10)
+mean_bin = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51, 15)
 
 cv2.namedWindow('mean thresholding', cv2.WINDOW_NORMAL)
 cv2.imshow('mean thresholding', mean_bin)
@@ -32,7 +32,7 @@ cv2.imshow('mean thresholding', mean_bin)
 
 # ------ Gaussian Adaptive Thresholding -------
 
-gaus_bin = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 10)
+gaus_bin = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 15)
 
 cv2.namedWindow('Gaus Thresholding', cv2.WINDOW_NORMAL)
 cv2.imshow('Gaus Thresholding', gaus_bin)
