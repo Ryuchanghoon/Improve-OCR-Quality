@@ -30,15 +30,15 @@ cv2.imshow('Closed', opened)
 # ------ 모폴로지 열림 후 닫힘 -------
 
 open_close = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
-cv2.namedWindow('Open after Close', cv2.WINDOW_NORMAL)
-cv2.imshow('Open after Close', open_close)
+cv2.namedWindow('Close after Open', cv2.WINDOW_NORMAL)
+cv2.imshow('Close after Open', open_close)
 
 
 # ------ 모폴로지 닫힘 후 열림 -------
 
 close_open = cv2.morphologyEx(closed, cv2.MORPH_OPEN, kernel)
-cv2.namedWindow('Close after Open', cv2.WINDOW_NORMAL)
-cv2.imshow('Close after Open', close_open)
+cv2.namedWindow('Open after Close', cv2.WINDOW_NORMAL)
+cv2.imshow('Open after Close', close_open)
 
 
 cv2.waitKey(0)
