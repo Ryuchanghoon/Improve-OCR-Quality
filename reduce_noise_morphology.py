@@ -24,7 +24,7 @@ cv2.imshow('Opened', opened)
 
 closed = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
 cv2.namedWindow('Closed', cv2.WINDOW_NORMAL)
-cv2.imshow('Closed', opened)
+cv2.imshow('Closed', closed)
 
 
 # ------ 모폴로지 열림 후 닫힘 -------
