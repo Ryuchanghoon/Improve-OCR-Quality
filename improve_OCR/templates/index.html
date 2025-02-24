@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing</title>
+    <script>
+        function uploadImage() {
+            let formData = new FormData();
+            formData.append("file", document.getElementById("fileInput").files[0]);
+            
+            fetch("/upload", { method: "POST", body: formData })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("processSteps").innerText = data.process_steps;
+                alert("File uploaded successfully");
+            });
+        }
+
+        function processImage(action) {
+            fetch(`/process/${action}`, { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("processSteps").innerText = data.process_steps;
+                document.getElementById("processedImage").src = `/processed/${data.process_steps.split('+').pop()}.jpg`;
+            });
+        }
+
+        function saveImage() {
+            fetch("/save", { method: "POST" })
+            .then(response => response.blob())
+            .then(blob => {
+                let link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "processed_image.jpg";
+                link.click();
+            });
+        }
+    </script>
+</head>
+<body>
+    <h2>Image Processing</h2>
+    <input type="file" id="fileInput">
+    <button onclick="uploadImage()">Upload</button>
+    <br><br>
+    <nav>
+        <button onclick="processImage('normalize')">Normalize</button>
+        <button onclick="processImage('remove_shadow')">Remove Shadow</button>
+        <button onclick="processImage('convert_bw')">Convert to B&W</button>
+        <button onclick="processImage('remove_background')">Remove Background</button>
+    </nav>
+    <br>
+    <p>Processing Steps: <span id="processSteps"></span></p>
+    <br>
+    <img id="processedImage" src="" alt="Processed Image">
+    <br>
+    <button onclick="saveImage()">Save Image</button>
+</body>
+</html>
