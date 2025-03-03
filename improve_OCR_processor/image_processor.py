@@ -51,6 +51,12 @@ class ImageProcessorApp(QWidget):
         self.btn_contour = QPushButton('Contour', self)
         self.btn_contour.clicked.connect(lambda: self.add_filter('Contour'))
 
+        self.btn_mean_thresh = QPushButton('Mean Adaptive Threshold', self)
+        self.btn_mean_thresh.clicked.connect(lambda: self.add_filter('mean_thresh'))
+
+        self.btn_gauss_thresh = QPushButton('Gaussian Adaptive Threshold', self)
+        self.btn_gauss_thresh.clicked.connect(lambda: self.add_filter('gauss_thresh'))
+
         self.btn_apply = QPushButton('Apply Filters', self)
         self.btn_apply.clicked.connect(self.apply_filters)
 
@@ -69,6 +75,8 @@ class ImageProcessorApp(QWidget):
         layout.addWidget(self.btn_prewitt)
         layout.addWidget(self.btn_sobel)
         layout.addWidget(self.btn_contour)
+        layout.addWidget(self.btn_mean_thresh)
+        layout.addWidget(self.btn_gauss_thresh)
         layout.addWidget(self.btn_apply)
         layout.addWidget(self.btn_save)
 
@@ -190,10 +198,15 @@ class ImageProcessorApp(QWidget):
 
                 filtered_image = np.zeros_like(image)
                 cv2.drawContours(filtered_image, text_contours, -1, (255, 255, 255), 1)
-
                 image = filtered_image
 
+            elif action == 'mean_thresh':
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51, 15)
 
+            elif action == 'gauss_thresh':
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 15)
 
 
         self.processed_image = image
