@@ -45,6 +45,12 @@ class ImageProcessorApp(QWidget):
         self.btn_clahe = QPushButton('CLAHE', self)
         self.btn_clahe.clicked.connect(lambda: self.add_filter('clahe'))
 
+        self.btn_prewitt = QPushButton('Apply Prewitt', self)
+        self.btn_prewitt.clicked.connect(lambda: self.add_filter('prewitt'))
+
+        self.btn_sobel = QPushButton('Apply Sobel', self)
+        self.btn_sobel.clicked.connect(lambda: self.add_filter('sobel'))
+
         self.btn_save = QPushButton('Save Image', self)
         self.btn_save.clicked.connect(self.save_image)
 
@@ -57,6 +63,8 @@ class ImageProcessorApp(QWidget):
         layout.addWidget(self.btn_convert_bw)
         layout.addWidget(self.btn_remove_bg)
         layout.addWidget(self.btn_clahe)
+        layout.addWidget(self.btn_prewitt)
+        layout.addWidget(self.btn_sobel)
         layout.addWidget(self.btn_apply)
         layout.addWidget(self.btn_save)
 
@@ -143,11 +151,31 @@ class ImageProcessorApp(QWidget):
                     filtered_image[y:y + h, x:x + w] = image[y:y + h, x:x + w]
                     image = filtered_image
 
-
             elif action == 'clahe':
                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                 clahe = cv2.createCLAHE(clipLimit = 5.0, tileGridSize = (3, 3))
                 image = clahe.apply(gray)
+
+            elif action == 'prewitt':
+                image = image.astype(np.float32)
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                prewitt_x = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]], dtype=np.float32)
+                prewitt_y = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]], dtype=np.float32)
+                prewitt_edges_x = cv2.filter2D(gray, -1, prewitt_x)
+                prewitt_edges_y = cv2.filter2D(gray, -1, prewitt_y)
+                prewitt_edges = cv2.magnitude(prewitt_edges_x, prewitt_edges_y)
+                image = cv2.normalize(prewitt_edges, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+            elif action == 'sobel':
+                image = image.astype(np.float32)
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
+                sobel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
+                sobel_edges_x = cv2.filter2D(gray, -1, sobel_x)
+                sobel_edges_y = cv2.filter2D(gray, -1, sobel_y)
+                sobel_edges = cv2.magnitude(sobel_edges_x, sobel_edges_y)
+                image = cv2.normalize(sobel_edges, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
 
         self.processed_image = image
         self.display_image(image)
