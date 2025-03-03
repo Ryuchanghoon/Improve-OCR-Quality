@@ -39,9 +39,6 @@ class ImageProcessorApp(QWidget):
         self.btn_remove_bg = QPushButton('Remove Background', self)
         self.btn_remove_bg.clicked.connect(lambda: self.add_filter('remove_background'))
 
-        self.btn_apply = QPushButton('Apply Filters', self)
-        self.btn_apply.clicked.connect(self.apply_filters)
-
         self.btn_clahe = QPushButton('CLAHE', self)
         self.btn_clahe.clicked.connect(lambda: self.add_filter('clahe'))
 
@@ -50,6 +47,12 @@ class ImageProcessorApp(QWidget):
 
         self.btn_sobel = QPushButton('Apply Sobel', self)
         self.btn_sobel.clicked.connect(lambda: self.add_filter('sobel'))
+
+        self.btn_contour = QPushButton('Contour', self)
+        self.btn_contour.clicked.connect(lambda: self.add_filter('Contour'))
+
+        self.btn_apply = QPushButton('Apply Filters', self)
+        self.btn_apply.clicked.connect(self.apply_filters)
 
         self.btn_save = QPushButton('Save Image', self)
         self.btn_save.clicked.connect(self.save_image)
@@ -65,6 +68,7 @@ class ImageProcessorApp(QWidget):
         layout.addWidget(self.btn_clahe)
         layout.addWidget(self.btn_prewitt)
         layout.addWidget(self.btn_sobel)
+        layout.addWidget(self.btn_contour)
         layout.addWidget(self.btn_apply)
         layout.addWidget(self.btn_save)
 
@@ -175,6 +179,21 @@ class ImageProcessorApp(QWidget):
                 sobel_edges_y = cv2.filter2D(gray, -1, sobel_y)
                 sobel_edges = cv2.magnitude(sobel_edges_x, sobel_edges_y)
                 image = cv2.normalize(sobel_edges, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+            
+            elif action == 'Contour':
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                mean_bin = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51, 15)
+                mean_bin_inv = 255 - mean_bin
+
+                text_contours, _ = cv2.findContours(mean_bin_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                filtered_image = np.zeros_like(image)
+                cv2.drawContours(filtered_image, text_contours, -1, (255, 255, 255), 1)
+
+                image = filtered_image
+
+
 
 
         self.processed_image = image
