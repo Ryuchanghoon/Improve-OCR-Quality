@@ -57,6 +57,12 @@ class ImageProcessorApp(QWidget):
         self.btn_gauss_thresh = QPushButton('Gaussian Adaptive Threshold', self)
         self.btn_gauss_thresh.clicked.connect(lambda: self.add_filter('gauss_thresh'))
 
+        self.btn_morph_open = QPushButton('Morphology Opening', self)
+        self.btn_morph_open.clicked.connect(lambda: self.add_filter('morph_open'))
+
+        self.btn_morph_close = QPushButton('Morphological Closing', self)
+        self.btn_morph_close.clicked.connect(lambda: self.add_filter('morph_close'))
+
         self.btn_apply = QPushButton('Apply Filters', self)
         self.btn_apply.clicked.connect(self.apply_filters)
 
@@ -77,6 +83,8 @@ class ImageProcessorApp(QWidget):
         layout.addWidget(self.btn_contour)
         layout.addWidget(self.btn_mean_thresh)
         layout.addWidget(self.btn_gauss_thresh)
+        layout.addWidget(self.btn_morph_open)
+        layout.addWidget(self.btn_morph_close)
         layout.addWidget(self.btn_apply)
         layout.addWidget(self.btn_save)
 
@@ -208,6 +216,16 @@ class ImageProcessorApp(QWidget):
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                 image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 15)
 
+            elif action == 'morph_open':
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                kernel = np.ones((3, 3), np.uint8)
+                image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+
+
+            elif action == 'morph_close':
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                kernel = np.ones((3, 3), np.uint8) 
+                image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
 
         self.processed_image = image
         self.display_image(image)
