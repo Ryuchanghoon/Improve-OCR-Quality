@@ -3,6 +3,7 @@ import numpy as np
 import os
 from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog
 from PyQt5.QtGui import QPixmap, QImage
+import button_func
 
 
 class ImageProcessorApp(QWidget):
@@ -26,76 +27,44 @@ class ImageProcessorApp(QWidget):
 
         self.btn_upload = QPushButton('Upload Image', self)
         self.btn_upload.clicked.connect(self.upload_image)
-
-        self.btn_remove_shadow = QPushButton('Remove Shadow', self)
-        self.btn_remove_shadow.clicked.connect(lambda: self.add_filter('remove_shadow'))  #
-
-        self.btn_convert_grayscale = QPushButton('GrayScale', self)
-        self.btn_convert_grayscale.clicked.connect(lambda: self.add_filter('grayscale'))  #
-
-        self.btn_remove_bg = QPushButton('Remove Background', self)
-        self.btn_remove_bg.clicked.connect(lambda: self.add_filter('remove_background'))  #
-
-        self.btn_clahe = QPushButton('CLAHE', self)
-        self.btn_clahe.clicked.connect(lambda: self.add_filter('clahe'))
-
-        self.btn_prewitt = QPushButton('Apply Prewitt', self)
-        self.btn_prewitt.clicked.connect(lambda: self.add_filter('prewitt'))
-
-        self.btn_sobel = QPushButton('Apply Sobel', self)
-        self.btn_sobel.clicked.connect(lambda: self.add_filter('sobel'))
-
-        self.btn_contour = QPushButton('Contour', self)
-        self.btn_contour.clicked.connect(lambda: self.add_filter('Contour'))
-
-        self.btn_mean_thresh = QPushButton('Mean Adaptive Threshold', self)
-        self.btn_mean_thresh.clicked.connect(lambda: self.add_filter('mean_thresh'))
-
-        self.btn_gauss_thresh = QPushButton('Gaussian Adaptive Threshold', self)
-        self.btn_gauss_thresh.clicked.connect(lambda: self.add_filter('gauss_thresh'))
-
-        self.btn_morph_open = QPushButton('Morphology Opening', self)
-        self.btn_morph_open.clicked.connect(lambda: self.add_filter('morph_open'))
-
-        self.btn_morph_close = QPushButton('Morphological Closing', self)
-        self.btn_morph_close.clicked.connect(lambda: self.add_filter('morph_close'))
-
-        self.btn_top_hat = QPushButton('Top Hat', self)
-        self.btn_top_hat.clicked.connect(lambda: self.add_filter('top_hat'))
-
-        self.btn_bottom_hat = QPushButton('Bottom Hat', self)
-        self.btn_bottom_hat.clicked.connect(lambda: self.add_filter('bottom_hat'))
-
-        self.btn_apply = QPushButton('Apply Filters', self)
+        
+        self.btn_apply = QPushButton('Apply', self)
         self.btn_apply.clicked.connect(self.apply_filters)
-
+        
         self.btn_refresh = QPushButton('Refresh', self)
-        self.btn_refresh.clicked.connect(self.refresh_image)  # 새로고침 버튼
+        self.btn_refresh.clicked.connect(self.refresh_image)  # 새로고침
 
-        self.btn_save = QPushButton('Save Image', self)
-        self.btn_save.clicked.connect(self.save_image)
-
+        self.buttons = {
+            'Remove Shadow': 'remove_shadow',
+            'GrayScale': 'grayscale',
+            'Remove Background': 'remove_background',
+            'CLAHE': 'clahe',
+            'Apply Prewitt': 'prewitt',
+            'Apply Sobel': 'sobel',
+            'Contour': 'contour',
+            'Mean Adaptive Threshold': 'mean_thresh',
+            'Gaussian Adaptive Threshold': 'gauss_thresh',
+            'Morphology Opening': 'morph_open',
+            'Morphological Closing': 'morph_close',
+            'Top Hat': 'top_hat',
+            'Bottom Hat': 'bottom_hat'
+        }
+        
         layout = QVBoxLayout()
         layout.addWidget(self.label)
         layout.addWidget(self.filter_label)
         layout.addWidget(self.btn_upload)
-        layout.addWidget(self.btn_remove_shadow)  #
-        layout.addWidget(self.btn_convert_grayscale)  #
-        layout.addWidget(self.btn_remove_bg)  #
-        layout.addWidget(self.btn_clahe)
-        layout.addWidget(self.btn_prewitt)
-        layout.addWidget(self.btn_sobel)
-        layout.addWidget(self.btn_contour)
-        layout.addWidget(self.btn_mean_thresh)
-        layout.addWidget(self.btn_gauss_thresh)
-        layout.addWidget(self.btn_morph_open)
-        layout.addWidget(self.btn_morph_close)
-        layout.addWidget(self.btn_top_hat)
-        layout.addWidget(self.btn_bottom_hat)
+        
+        self.button_widgets = []
+        for text, action in self.buttons.items():
+            btn = QPushButton(text, self)
+            btn.clicked.connect(lambda checked, act=action: self.add_filter(act))
+            layout.addWidget(btn)
+            self.button_widgets.append(btn)
+        
         layout.addWidget(self.btn_apply)
         layout.addWidget(self.btn_refresh)
-        layout.addWidget(self.btn_save)
-
+        
         self.setLayout(layout)
 
     def upload_image(self):
@@ -103,11 +72,11 @@ class ImageProcessorApp(QWidget):
         if file_name:
             self.current_image_path = os.path.abspath(file_name)
             self.original_image = cv2.imdecode(np.fromfile(self.current_image_path, dtype=np.uint8), cv2.IMREAD_COLOR)
-
+            
             if self.original_image is None:
                 print(f"Error: Unable to load image from {self.current_image_path}")
                 return
-
+            
             self.applied_filters = []
             self.processed_image = self.original_image.copy()
             self.display_image(self.original_image)
@@ -142,9 +111,9 @@ class ImageProcessorApp(QWidget):
 
     def update_filter_label(self):
         if self.applied_filters:
-            self.filter_label.setText("Selected Filters: " + " + ".join(self.applied_filters))
+            self.filter_label.setText("Selected: " + " + ".join(self.applied_filters))
         else:
-            self.filter_label.setText("Selected Filters: None")
+            self.filter_label.setText("Selected: None")
 
     def apply_filters(self):
         if self.original_image is None:
@@ -154,118 +123,13 @@ class ImageProcessorApp(QWidget):
         image = self.original_image.copy()
 
         for action in self.applied_filters:
-            
-            if action == 'remove_shadow':  #
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                bg_blur = cv2.GaussianBlur(image, (55, 55), 0)  # 가우시안 필터
-                normalized = cv2.divide(image, bg_blur, scale=255)  # 정규화
-                kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
-
-                top_hat = cv2.morphologyEx(normalized, cv2.MORPH_TOPHAT, kernel)
-                bottom_hat = cv2.morphologyEx(normalized, cv2.MORPH_BLACKHAT, kernel)
-                shadow_removed = cv2.add(normalized, top_hat)
-                image = cv2.subtract(shadow_removed, bottom_hat)
-
-
-            elif action == 'grayscale':
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-            elif action == 'remove_background':
-                if len(image.shape) == 3:
-                    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                else:
-                    gray = image.copy()
-
-                mean_bin = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51, 15)
-                mean_bin_inv = 255 - mean_bin
-                contours, _ = cv2.findContours(mean_bin_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                if contours:
-                    largest_contour = max(contours, key=cv2.contourArea)
-                    x, y, w, h = cv2.boundingRect(largest_contour)
-                    filtered_image = np.zeros_like(image)
-                    filtered_image[y:y + h, x:x + w] = image[y:y + h, x:x + w]
-                    image = filtered_image
-
-            elif action == 'clahe':
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                clahe = cv2.createCLAHE(clipLimit = 5.0, tileGridSize = (3, 3))
-                image = clahe.apply(gray)
-
-            elif action == 'prewitt':
-                image = image.astype(np.float32)
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                prewitt_x = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]], dtype=np.float32)
-                prewitt_y = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]], dtype=np.float32)
-                prewitt_edges_x = cv2.filter2D(gray, -1, prewitt_x)
-                prewitt_edges_y = cv2.filter2D(gray, -1, prewitt_y)
-                prewitt_edges = cv2.magnitude(prewitt_edges_x, prewitt_edges_y)
-                image = cv2.normalize(prewitt_edges, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-
-            elif action == 'sobel':
-                image = image.astype(np.float32)
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
-                sobel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
-                sobel_edges_x = cv2.filter2D(gray, -1, sobel_x)
-                sobel_edges_y = cv2.filter2D(gray, -1, sobel_y)
-                sobel_edges = cv2.magnitude(sobel_edges_x, sobel_edges_y)
-                image = cv2.normalize(sobel_edges, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-
-            
-            elif action == 'Contour':
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                mean_bin = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51, 15)
-                mean_bin_inv = 255 - mean_bin
-
-                text_contours, _ = cv2.findContours(mean_bin_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-                filtered_image = np.zeros_like(image)
-                cv2.drawContours(filtered_image, text_contours, -1, (255, 255, 255), 1)
-                image = filtered_image
-
-            elif action == 'mean_thresh':
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51, 15)
-
-            elif action == 'gauss_thresh':
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 15)
-
-            elif action == 'morph_open':
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                kernel = np.ones((3, 3), np.uint8)
-                image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-
-            elif action == 'morph_close':
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                kernel = np.ones((3, 3), np.uint8) 
-                image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
-
-            elif action == 'top_hat':
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                bg_blur = cv2.GaussianBlur(image, (55, 55), 0)  # 가우시안 필터
-                normalized = cv2.divide(image, bg_blur, scale=255)  # 정규화
-                kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))  # 텍스트 크기 10 by 10
-                image = cv2.morphologyEx(normalized, cv2.MORPH_TOPHAT, kernel)
-
-            elif action == 'bottom_hat':
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                bg_blur = cv2.GaussianBlur(image, (55, 55), 0)  # 가우시안 필터
-                normalized = cv2.divide(image, bg_blur, scale=255)  # 정규화
-                kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))  # 텍스트 크기 10 by 10
-                image = cv2.morphologyEx(normalized, cv2.MORPH_BLACKHAT, kernel)
+            if hasattr(button_func, action):
+                image = getattr(button_func, action)(image)
+            else:
+                print(f"Warning: Function {action} not found in button_func module")
 
         self.processed_image = image
         self.display_image(image)
-
-    def save_image(self):
-        if self.processed_image is None:
-            print("Error: No processed image to save")
-            return
-        save_path, _ = QFileDialog.getSaveFileName(self, 'Save Image', '', 'Images (*.png *.jpg *.jpeg *.bmp)')
-        if save_path:
-            cv2.imencode('.jpg', self.processed_image)[1].tofile(save_path)
-
 
 if __name__ == '__main__':
     app = QApplication([])
