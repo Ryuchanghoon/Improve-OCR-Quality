@@ -27,17 +27,14 @@ class ImageProcessorApp(QWidget):
         self.btn_upload = QPushButton('Upload Image', self)
         self.btn_upload.clicked.connect(self.upload_image)
 
-        self.btn_normalize = QPushButton('Normalize', self)
-        self.btn_normalize.clicked.connect(lambda: self.add_filter('normalize'))
-
         self.btn_remove_shadow = QPushButton('Remove Shadow', self)
-        self.btn_remove_shadow.clicked.connect(lambda: self.add_filter('remove_shadow'))
+        self.btn_remove_shadow.clicked.connect(lambda: self.add_filter('remove_shadow'))  #
 
-        self.btn_convert_bw = QPushButton('Convert to B/W', self)
-        self.btn_convert_bw.clicked.connect(lambda: self.add_filter('convert_bw'))
+        self.btn_convert_grayscale = QPushButton('GrayScale', self)
+        self.btn_convert_grayscale.clicked.connect(lambda: self.add_filter('grayscale'))  #
 
         self.btn_remove_bg = QPushButton('Remove Background', self)
-        self.btn_remove_bg.clicked.connect(lambda: self.add_filter('remove_background'))
+        self.btn_remove_bg.clicked.connect(lambda: self.add_filter('remove_background'))  #
 
         self.btn_clahe = QPushButton('CLAHE', self)
         self.btn_clahe.clicked.connect(lambda: self.add_filter('clahe'))
@@ -72,6 +69,9 @@ class ImageProcessorApp(QWidget):
         self.btn_apply = QPushButton('Apply Filters', self)
         self.btn_apply.clicked.connect(self.apply_filters)
 
+        self.btn_refresh = QPushButton('Refresh', self)
+        self.btn_refresh.clicked.connect(self.refresh_image)  # 새로고침 버튼
+
         self.btn_save = QPushButton('Save Image', self)
         self.btn_save.clicked.connect(self.save_image)
 
@@ -79,10 +79,9 @@ class ImageProcessorApp(QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.filter_label)
         layout.addWidget(self.btn_upload)
-        layout.addWidget(self.btn_normalize)
-        layout.addWidget(self.btn_remove_shadow)
-        layout.addWidget(self.btn_convert_bw)
-        layout.addWidget(self.btn_remove_bg)
+        layout.addWidget(self.btn_remove_shadow)  #
+        layout.addWidget(self.btn_convert_grayscale)  #
+        layout.addWidget(self.btn_remove_bg)  #
         layout.addWidget(self.btn_clahe)
         layout.addWidget(self.btn_prewitt)
         layout.addWidget(self.btn_sobel)
@@ -94,6 +93,7 @@ class ImageProcessorApp(QWidget):
         layout.addWidget(self.btn_top_hat)
         layout.addWidget(self.btn_bottom_hat)
         layout.addWidget(self.btn_apply)
+        layout.addWidget(self.btn_refresh)
         layout.addWidget(self.btn_save)
 
         self.setLayout(layout)
@@ -131,6 +131,15 @@ class ImageProcessorApp(QWidget):
         self.applied_filters.append(action)
         self.update_filter_label()
 
+    def refresh_image(self):
+        if self.original_image is not None:
+            self.processed_image = self.original_image.copy()
+            self.applied_filters = []
+            self.display_image(self.processed_image)
+            self.update_filter_label()
+        else:
+            print("Error: No image loaded")
+
     def update_filter_label(self):
         if self.applied_filters:
             self.filter_label.setText("Selected Filters: " + " + ".join(self.applied_filters))
@@ -145,23 +154,21 @@ class ImageProcessorApp(QWidget):
         image = self.original_image.copy()
 
         for action in self.applied_filters:
-            if action != 'convert_bw' and len(image.shape) == 2:
-                image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-
-            if action == 'normalize':
-                bg_blur = cv2.GaussianBlur(image, (55, 55), 0)
-                image = cv2.divide(image, bg_blur, scale=255)
-
-            elif action == 'remove_shadow':
+            
+            if action == 'remove_shadow':  #
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                bg_blur = cv2.GaussianBlur(image, (55, 55), 0)  # 가우시안 필터
+                normalized = cv2.divide(image, bg_blur, scale=255)  # 정규화
                 kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
-                top_hat = cv2.morphologyEx(image, cv2.MORPH_TOPHAT, kernel)
-                bottom_hat = cv2.morphologyEx(image, cv2.MORPH_BLACKHAT, kernel)
-                shadow_removed = cv2.add(image, top_hat)
+
+                top_hat = cv2.morphologyEx(normalized, cv2.MORPH_TOPHAT, kernel)
+                bottom_hat = cv2.morphologyEx(normalized, cv2.MORPH_BLACKHAT, kernel)
+                shadow_removed = cv2.add(normalized, top_hat)
                 image = cv2.subtract(shadow_removed, bottom_hat)
 
-            elif action == 'convert_bw':
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                image = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51, 15)
+
+            elif action == 'grayscale':
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
             elif action == 'remove_background':
                 if len(image.shape) == 3:
