@@ -42,6 +42,9 @@ class ImageProcessorApp(QWidget):
         self.btn_apply = QPushButton('Apply Filters', self)
         self.btn_apply.clicked.connect(self.apply_filters)
 
+        self.btn_clahe = QPushButton('CLAHE', self)
+        self.btn_clahe.clicked.connect(lambda: self.add_filter('clahe'))
+
         self.btn_save = QPushButton('Save Image', self)
         self.btn_save.clicked.connect(self.save_image)
 
@@ -53,6 +56,7 @@ class ImageProcessorApp(QWidget):
         layout.addWidget(self.btn_remove_shadow)
         layout.addWidget(self.btn_convert_bw)
         layout.addWidget(self.btn_remove_bg)
+        layout.addWidget(self.btn_clahe)
         layout.addWidget(self.btn_apply)
         layout.addWidget(self.btn_save)
 
@@ -138,6 +142,12 @@ class ImageProcessorApp(QWidget):
                     filtered_image = np.zeros_like(image)
                     filtered_image[y:y + h, x:x + w] = image[y:y + h, x:x + w]
                     image = filtered_image
+
+
+            elif action == 'clahe':
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                clahe = cv2.createCLAHE(clipLimit = 5.0, tileGridSize = (3, 3))
+                image = clahe.apply(gray)
 
         self.processed_image = image
         self.display_image(image)
