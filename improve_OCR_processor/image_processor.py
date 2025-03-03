@@ -63,6 +63,12 @@ class ImageProcessorApp(QWidget):
         self.btn_morph_close = QPushButton('Morphological Closing', self)
         self.btn_morph_close.clicked.connect(lambda: self.add_filter('morph_close'))
 
+        self.btn_top_hat = QPushButton('Top Hat', self)
+        self.btn_top_hat.clicked.connect(lambda: self.add_filter('top_hat'))
+
+        self.btn_bottom_hat = QPushButton('Bottom Hat', self)
+        self.btn_bottom_hat.clicked.connect(lambda: self.add_filter('bottom_hat'))
+
         self.btn_apply = QPushButton('Apply Filters', self)
         self.btn_apply.clicked.connect(self.apply_filters)
 
@@ -85,6 +91,8 @@ class ImageProcessorApp(QWidget):
         layout.addWidget(self.btn_gauss_thresh)
         layout.addWidget(self.btn_morph_open)
         layout.addWidget(self.btn_morph_close)
+        layout.addWidget(self.btn_top_hat)
+        layout.addWidget(self.btn_bottom_hat)
         layout.addWidget(self.btn_apply)
         layout.addWidget(self.btn_save)
 
@@ -221,11 +229,24 @@ class ImageProcessorApp(QWidget):
                 kernel = np.ones((3, 3), np.uint8)
                 image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
 
-
             elif action == 'morph_close':
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                 kernel = np.ones((3, 3), np.uint8) 
                 image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
+
+            elif action == 'top_hat':
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                bg_blur = cv2.GaussianBlur(image, (55, 55), 0)  # 가우시안 필터
+                normalized = cv2.divide(image, bg_blur, scale=255)  # 정규화
+                kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))  # 텍스트 크기 10 by 10
+                image = cv2.morphologyEx(normalized, cv2.MORPH_TOPHAT, kernel)
+
+            elif action == 'bottom_hat':
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                bg_blur = cv2.GaussianBlur(image, (55, 55), 0)  # 가우시안 필터
+                normalized = cv2.divide(image, bg_blur, scale=255)  # 정규화
+                kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))  # 텍스트 크기 10 by 10
+                image = cv2.morphologyEx(normalized, cv2.MORPH_BLACKHAT, kernel)
 
         self.processed_image = image
         self.display_image(image)
