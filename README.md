@@ -30,7 +30,7 @@ GUI 기반으로, 다운로드 후 실시간으로 적용 결과를 즉시 확�
 
 ## TooL
 
-`OpenCV` `Numpy` `OpenCV` `Matplotlib` `PyQt`
+`Python` `OpenCV` `Numpy` `Matplotlib` `PyQt`
 
 </br>
 
