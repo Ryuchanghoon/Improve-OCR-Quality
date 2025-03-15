@@ -16,7 +16,7 @@ OCR 인식률 향상을 위한 이미지 전처리 기술 구현 및 비교(개�
 
 |원본|흑백|흑백 + CLAHE|그림자 제거 + 배경 제거 + CLAHE|그림자 제거 + 배경 제거 + Prewitt Edge|그림자 제거 + 배경 제거 + Mean Adaptive Thresholding|
 |:---:|:---:|:---:|:---:|:---:|:---:|
-|<img src="https://github.com/user-attachments/assets/f918abd0-ac2b-436f-8d26-ac804facd591" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/4ae7abb1-cb54-4721-9b4e-da5da0e613b8" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/ec93317c-f3ff-49b5-b46b-3fe8fd2fd803" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/4b365c8e-03fd-45f6-bae0-3b99dd0d3d03" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/32f61705-b2c6-4eca-866f-686d1e7a7c65" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/32f61705-b2c6-4eca-866f-686d1e7a7c65" width="150" height="200" />|
+|<img src="https://github.com/user-attachments/assets/f918abd0-ac2b-436f-8d26-ac804facd591" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/4ae7abb1-cb54-4721-9b4e-da5da0e613b8" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/ec93317c-f3ff-49b5-b46b-3fe8fd2fd803" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/4b365c8e-03fd-45f6-bae0-3b99dd0d3d03" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/32f61705-b2c6-4eca-866f-686d1e7a7c65" width="200" height="200" />|<img src="https://github.com/user-attachments/assets/6843413e-f98a-46a4-b7a5-7319477dc414" width="150" height="200" />|
 
 </br>
 
