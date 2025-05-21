@@ -28,6 +28,29 @@ GUI 기반으로, 다운로드 후 실시간으로 적용 결과를 즉시 확�
 
 </br>
 
+## 개발 성과
+
+모델 파인튜닝 없이 인식률을 높이기 위해, 전통 비전 기법을 조합하며 수많은 실험을 반복했습니다.
+
+`그림자 제거`
+
+- Top-hat(모폴로지): 밝은 부분 강조
+- Bottom-hat(모폴로지): 그림자 같은 어두운 성분 강조
+- 그림자 제거 방식: 정규화 이미지 + Top-hat - Bottom-hat
+  -> 최종 밝은 정보 최대한 살리고, 어두운 그림자 성분 제거.
+
+</br>
+
+`배경 제거`
+
+- Adaptive Thresholding: 조명 고려하여 이진화로 텍스트-배경 구분
+- Contour: cv2.findContours로 외곽선 검출
+- 가장 큰 외곽선 추출: 텍스트 포함 최대 외곽선에 대해 boundingRect 적용
+- ROI 기반 필터링: 해당 영역만 유지, 배경 요소 제거.
+
+
+</br>
+
 ## TooL
 
 `Python` `OpenCV` `Numpy` `Matplotlib` `PyQt`
